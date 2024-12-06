@@ -1,0 +1,11 @@
+tensorflow==2.17.1
+keras
+numpy
+pandas
+matplotlib
+joblib
+scikit-learn
+flask
+yfinance
+jupyter
+google-cloud-storage
