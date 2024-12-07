@@ -160,3 +160,29 @@ def load_from_gcs(bucket_name, paths={}):
 
 
     return model, scaler
+
+def get_window(stock: str) -> int:
+    windows = {
+        "^GSPC": 104,
+        "ADRO.JK": 72,
+        "ANTM.JK": 52,
+        "ASII.JK": 60,
+        "BBCA.JK": 36,
+        "BBNI.JK": 52,
+        "BBRI.JK": 30,
+        "BMRI.JK": 30,
+        "CTRA.JK": 30,
+        "GC=F": 52,
+        "GGRM.JK": 30,
+        "IDR=X": 4,
+        "INDF.JK": 52,
+        "INDY.JK": 52,
+        "LPKR.JK": 52,
+        "MYOR.JK": 52,
+        "PWON.JK": 52,
+        "UNVR.JK": 52
+    }
+
+    stock = stock.upper()
+
+    return windows.get(stock)

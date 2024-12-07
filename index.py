@@ -13,11 +13,12 @@ from utils import (
     load_scaler_from_gcs,
     load_model_from_gcs,
     load_csv_from_gcs,
-    load_from_gcs
+    load_from_gcs,
+    get_window
 )
 
 app = Flask(__name__)
-WINDOW_SIZE = 4  # Menyesuaikan dengan jenis saham
+# WINDOW_SIZE = 4  # Menyesuaikan dengan jenis saham
 BUCKET_NAME = "finsight-ml-model"
 DATA_FROM = 2024
 
@@ -27,7 +28,7 @@ def predict():
     if not data or "stock" not in data or "steps" not in data:
         return jsonify({
             "status": "failed",
-            "error": "Missing risk profile!"
+            "error": "Missing stock or steps"
         }),400
 
     try:
@@ -38,11 +39,17 @@ def predict():
         # Current Year
         current_year = int(datetime.now().year)
         '''
-        Kalo request dari tahun 2025 dengan steps 5, maka akan prediksi s/d 2023
+        Kalo request dari tahun 2025 dengan steps 5, maka akan prediksi s/d 2030
         Karena data sampai dengan tahun 2024, maka kita harus menambahkan 1 (2025 - 2024)
         '''
         gap = current_year - DATA_FROM
         steps += gap
+        WINDOW_SIZE = get_window(stock)
+        if not WINDOW_SIZE:
+            return jsonify({
+                "status": "failed",
+                "error": "Stock unavailable"
+            }), 404
 
         # ===== UNCOMMENT UNTUK DOWNLOAD DARI GCS =====
         # model_path = f"stock_model/{stock}/model_saham.h5"
