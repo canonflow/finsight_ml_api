@@ -138,7 +138,8 @@ def riskProfile():
     
     riskProfile = data["riskProfile"]
     
-    tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'JPM', 'JNJ', 'PG', '^GSPC', 'BTC-USD']
+    tickers = ["^GSPC", "ADRO.JK", "ANTM.JK", "ASII.JK", "BBCA.JK", "BBNI.JK", "BBRI.JK", "BMRI.JK", "CTRA.JK", "GC=F", "GGRM.JK", "IDR=X", "INDF.JK", "INDY.JK", "LPKR.JK", "MYOR.JK", "PWON.JK", "UNVR.JK"]
+
     end_date = datetime.now()
     start_date = end_date - timedelta(days=365 * 2)  
     try: 
