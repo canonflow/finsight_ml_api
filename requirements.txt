@@ -9,3 +9,4 @@ flask
 yfinance
 jupyter
 google-cloud-storage
+ta
