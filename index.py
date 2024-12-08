@@ -5,6 +5,7 @@ import tensorflow as tf
 import numpy as np
 import joblib
 import pandas as pd
+import yfinance as yf
 import json
 import os
 from utils import (
@@ -146,6 +147,10 @@ def riskProfile():
     riskProfile = data["riskProfile"]
     
     tickers = ["^GSPC", "ADRO.JK", "ANTM.JK", "ASII.JK", "BBCA.JK", "BBNI.JK", "BBRI.JK", "BMRI.JK", "CTRA.JK", "GC=F", "GGRM.JK", "IDR=X", "INDF.JK", "INDY.JK", "LPKR.JK", "MYOR.JK", "PWON.JK", "UNVR.JK"]
+    
+    bucket_base_url = "https://storage.googleapis.com/finsight-profile/stocks/"
+    
+    
 
     end_date = datetime.now()
     start_date = end_date - timedelta(days=365 * 2)  
@@ -159,10 +164,20 @@ def riskProfile():
         stock_system.perform_clustering(n_clusters=3)
         
         recommendations = stock_system.get_recommendations(riskProfile)
+        recommendations_with_details = []
+        for ticker in recommendations:
+            stock = yf.Ticker(ticker)
+            current_price = stock.history(period="1d")['Close'].iloc[-1] if not stock.history(period="1d").empty else None
+            
+            recommendations_with_details.append({
+                "ticker": ticker,
+                "image_url": f"{bucket_base_url}{ticker}.png",
+                "current_price": current_price
+            })
         
         return jsonify({
             "status": "success",
-            "recommendations": recommendations
+            "recommendations": recommendations_with_details
         }),200
         
         
