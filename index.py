@@ -134,6 +134,40 @@ def predict():
     #     'prediction': predicted_actual.flatten().tolist()[-1]
     # })
     
+@app.route("/stocks", methods=['GET'])
+def stocks():
+    try:
+        stocks = []
+        tickers = [
+            "^GSPC", "ADRO.JK", "ANTM.JK", "ASII.JK", "BBCA.JK", "BBNI.JK", 
+            "BBRI.JK", "BMRI.JK", "CTRA.JK", "GC=F", "GGRM.JK", "IDR=X", 
+            "INDF.JK", "INDY.JK", "LPKR.JK", "MYOR.JK", "PWON.JK", "UNVR.JK"
+        ]
+        bucket_base_url = "https://storage.googleapis.com/finsight-profile/stocks/"
+
+        for ticker in tickers:
+            stock = yf.Ticker(ticker)
+            history = stock.history(period="1d")
+            current_price = history['Close'].iloc[-1] if not history.empty else None
+
+            stocks.append({
+                "ticker": ticker,
+                "image_url": f"{bucket_base_url}{ticker}.png",
+                "current_price": current_price
+            })
+
+        return jsonify({
+            "status": "success",
+            "stocks": stocks
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "status": "failed",
+            "error": str(e)
+        }), 400
+
+    
 @app.route('/riskprofile', methods=['POST'])
 def riskProfile():
     data = request.get_json()
