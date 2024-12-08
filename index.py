@@ -100,6 +100,12 @@ def predict():
         # Convert to actual price
         predicted_actual = scaler.inverse_transform([predicted_values]).flatten().tolist()
 
+        # Percentage Change
+        percentage_change = round(
+            ((predicted_actual[-1] / predicted_actual[0]) - 1) * 100,
+            2
+        )
+
         # Response
         response = {
             'status': 'success',
@@ -109,6 +115,7 @@ def predict():
             },
             'year_from': str(DATA_FROM),
             'year_to': str(DATA_FROM + steps),
+            'percentage_change': percentage_change
         }
 
         return jsonify(response), 200
