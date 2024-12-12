@@ -149,11 +149,13 @@ def stocks():
             stock = yf.Ticker(ticker)
             history = stock.history(period="1d")
             current_price = history['Close'].iloc[-1] if not history.empty else None
+            company_info = stock.info
 
             stocks.append({
                 "ticker": ticker,
                 "image_url": f"{bucket_base_url}{ticker}.png",
-                "current_price": current_price
+                "current_price": current_price,
+                "description": company_info.get('longBusinessSummary', "Description not available")
             })
 
         return jsonify({
@@ -176,21 +178,26 @@ def riskProfile():
         return jsonify({
             "status": "failed",
             "error": "Missing risk profile!"
-        }),400
+        }), 400
     
     riskProfile = data["riskProfile"]
     
-    tickers = ["^GSPC", "ADRO.JK", "ANTM.JK", "ASII.JK", "BBCA.JK", "BBNI.JK", "BBRI.JK", "BMRI.JK", "CTRA.JK", "GC=F", "GGRM.JK", "IDR=X", "INDF.JK", "INDY.JK", "LPKR.JK", "MYOR.JK", "PWON.JK", "UNVR.JK"]
+    tickers = ["^GSPC", "ADRO.JK", "ANTM.JK", "ASII.JK", "BBCA.JK", "BBNI.JK", 
+               "BBRI.JK", "BMRI.JK", "CTRA.JK", "GC=F", "GGRM.JK", "IDR=X", 
+               "INDF.JK", "INDY.JK", "LPKR.JK", "MYOR.JK", "PWON.JK", "UNVR.JK"]
     
     bucket_base_url = "https://storage.googleapis.com/finsight-profile/stocks/"
     
-    
-
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=365 * 2)  
+    start_date = end_date - timedelta(days=365 * 2)
+    
     try: 
-        stock_system = StockClusteringSystem(tickers, start_date.strftime('%Y-%m-%d'),
-            end_date.strftime('%Y-%m-%d'))
+        # Initialize and run the stock clustering system
+        stock_system = StockClusteringSystem(
+            tickers, 
+            start_date.strftime('%Y-%m-%d'),
+            end_date.strftime('%Y-%m-%d')
+        )
         
         stock_system.fetch_data()
         stock_system.create_feature_matrix()
@@ -199,28 +206,31 @@ def riskProfile():
         
         recommendations = stock_system.get_recommendations(riskProfile)
         recommendations_with_details = []
+        
         for ticker in recommendations:
             stock = yf.Ticker(ticker)
-            current_price = stock.history(period="1d")['Close'].iloc[-1] if not stock.history(period="1d").empty else None
+            history = stock.history(period="1d")
+            current_price = history['Close'].iloc[-1] if not history.empty else None
+            company_info = stock.info
             
             recommendations_with_details.append({
                 "ticker": ticker,
                 "image_url": f"{bucket_base_url}{ticker}.png",
-                "current_price": current_price
+                "current_price": current_price,
+                "description": company_info.get('longBusinessSummary', "Description not available")
             })
         
         return jsonify({
             "status": "success",
             "recommendations": recommendations_with_details
-        }),200
-        
-        
+        }), 200
         
     except Exception as e:
         return jsonify({
             "status": "failed",
             "error": str(e)
-        }),400
+        }), 400
+
     
 PORT=8080
 
